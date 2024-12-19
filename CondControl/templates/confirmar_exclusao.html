@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Confirmar Exclusão</title>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Confirmar Exclusão</h1>
+        <p>Você tem certeza que deseja excluir a receita <strong>{{ receita.descricao }}</strong>?</p>
+        <form method="POST" action="{{ url_for('excluir_receita', id=receita.id) }}">
+            <button type="submit" class="btn btn-danger">Excluir</button>
+            <a href="{{ url_for('ver_receitas') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</body>
+</html>

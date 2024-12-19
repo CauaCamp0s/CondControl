@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitantes</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <style>
+        /* Garantir que o rodapé fique fixo no fundo da página */
+        footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #f8f9fa;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        /* Garantir que o conteúdo principal não fique oculto atrás do rodapé */
+        body {
+            padding-bottom: 80px; /* O rodapé tem 60px de altura, mas agora o botão de imprimir também precisa de espaço */
+        }
+
+        /* Estilo do botão de impressão */
+        #printButton {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="http://127.0.0.1:5000/index">CondControl</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/reservas">Reservas</a></li>
+                <li class="nav-item"><a class="nav-link" href="/financeiro">Financeiro</a></li>
+                <li class="nav-item"><a class="nav-link" href="/comunicados">Comunicados</a></li>
+                <li class="nav-item"><a class="nav-link" href="/ocorrencias">Ocorrências</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/visitantes">Visitantes</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>Visitantes</h1>
+        <p>Aqui você pode registrar e gerenciar visitantes do condomínio.</p>
+
+        <!-- Formulário para registrar um novo visitante -->
+        <form method="POST" action="/registrar_visitante" class="mb-4">
+            <div class="form-group">
+                <label for="nome">Nome Completo</label>
+                <input type="text" class="form-control" id="nome" name="nome" required>
+            </div>
+            <div class="form-group">
+                <label for="tipo_documento">Tipo de Documento</label>
+                <select class="form-control" id="tipo_documento" name="tipo_documento" required>
+                    <option value="cpf">CPF</option>
+                    <option value="rg">RG</option>
+                </select>
+                <input type="text" class="form-control mt-2" id="documento" name="documento" required>
+            </div>
+            <div class="form-group">
+                <label for="data_entrada">Data e Hora da Entrada</label>
+                <input type="datetime-local" class="form-control" id="data_entrada" name="data_entrada" required>
+            </div>
+            <div class="form-group">
+                <label for="morador">Morador Recepcionista</label>
+                <select class="form-control" id="morador" name="morador_id" required>
+                    <option value="" disabled selected>Selecione um morador</option>
+                    {% for morador in moradores %}
+                        <option value="{{ morador.id }}">{{ morador.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Registrar Visitante</button>
+        </form>
+
+        <!-- Tabela de Visitantes -->
+        <h2>Lista de Visitantes</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr class="table-primary">
+                    <th>Nome</th>
+                    <th>Documento</th>
+                    <th>Data de Entrada</th>
+                    <th>Morador</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for visitante in visitantes %}
+                <tr>
+                    <td>{{ visitante.nome }}</td>
+                    <td>{{ visitante.documento }}</td>
+                    <td>{{ visitante.data_entrada.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>{{ visitante.morador.nome if visitante.morador else 'N/A' }}</td>
+                    <td>
+                        <a href="{{ url_for('editar_visitante', visitante_id=visitante.id) }}" class="btn btn-warning btn-sm">Editar</a>
+                        <form action="{{ url_for('excluir_visitante', visitante_id=visitante.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Botão de Imprimir -->
+    <div class="text-center">
+        <button id="printButton" class="btn btn-secondary" onclick="window.print()">Imprimir</button>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 CondControl. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        // Máscara para o campo de documento
+        $(document).ready(function() {
+            $('#tipo_documento').change(function() {
+                var tipo = $(this).val();
+                var mask = tipo === 'cpf' ? '000.000.000-00' : '00.000.000-0';
+                $('#documento').mask(mask);
+            });
+
+            // Inicializa a máscara com CPF
+            $('#documento').mask('000.000.000-00');
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

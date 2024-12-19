@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Reservas</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="http://127.0.0.1:5000/index">CondControl</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/reservas">Reservas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/financeiro">Financeiro</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/comunicados">Comunicados</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ocorrencias">Ocorrências</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/visitantes">Visitantes</a>
+                    </li>
+                </ul>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Reservas de Áreas Comuns</h1>
+
+        <form id="reservaForm" class="mb-4">
+            <div class="form-group">
+                <label for="area_id">Área Comum:</label>
+                <select class="form-control" name="area_id" id="area_id" required>
+                    <!-- As opções serão preenchidas dinamicamente pelo JavaScript -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="morador_id">Morador:</label>
+                <select class="form-control" name="morador_id" id="morador_id" required>
+                    <!-- As opções serão preenchidas dinamicamente pelo JavaScript -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="data_reserva">Data:</label>
+                <input type="date" class="form-control" name="data_reserva" id="data_reserva" required>
+            </div>
+            <div class="form-group">
+                <label for="hora_inicio">Hora Início:</label>
+                <input type="time" class="form-control" name="hora_inicio" id="hora_inicio" required>
+            </div>
+            <div class="form-group">
+                <label for="hora_fim">Hora Fim:</label>
+                <input type="time" class="form-control" name="hora_fim" id="hora_fim" required>
+            </div>
+            
+            <!-- Botões Voltar e Salvar -->
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-secondary mb-4" onclick="window.location.href='http://127.0.0.1:5000';">Voltar</button>
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+        </form>
+
+        <div id="reservasList" class="mt-4">
+            <h2>Lista de Reservas</h2>
+            <ul class="list-group"></ul>
+        </div>
+    </div>
+
+    <script>
+        async function loadAreas() {
+            const response = await fetch('/areas');
+            const areas = await response.json();
+            console.log('Áreas:', areas);  // Adicione isso para depuração
+
+            const areaSelect = document.getElementById('area_id');
+            areaSelect.innerHTML = '';
+
+            areas.forEach(area => {
+                const option = document.createElement('option');
+                option.value = area.id;
+                option.textContent = area.nome;
+                areaSelect.appendChild(option);
+    });
+}
+
+        async function loadMoradores() {
+            const response = await fetch('/moradores');
+            const moradores = await response.json();
+            console.log('Moradores:', moradores);  // Adicione isso para depuração
+
+            const moradorSelect = document.getElementById('morador_id');
+            moradorSelect.innerHTML = '';
+
+            moradores.forEach(morador => {
+                const option = document.createElement('option');
+                option.value = morador.id;
+                option.textContent = `${morador.nome} - Moradia ${morador.moradia}`;
+                moradorSelect.appendChild(option);
+            });
+}
+
+        async function verificarDisponibilidade(area_id, data_reserva) {
+            const response = await fetch(`/reservas?area_id=${area_id}&data_reserva=${data_reserva}`);
+            const reservas = await response.json();
+
+            return reservas.length > 0;
+        }
+
+        document.getElementById('reservaForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+
+            const isReservada = await verificarDisponibilidade(data.area_id, data.data_reserva);
+            if (isReservada) {
+                alert('A área escolhida já está reservada para esta data.');
+                return;
+            }
+
+            const response = await fetch('/reservas', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                alert('Reserva criada com sucesso!');
+                // Redireciona para a página inicial
+                window.location.href = '/';
+            } else {
+                alert('Erro ao criar reserva');
+            }
+        });
+
+        async function loadReservas() {
+            const response = await fetch('/reservas');
+            const reservas = await response.json();
+
+            const reservasList = document.getElementById('reservasList').querySelector('ul');
+            reservasList.innerHTML = '';
+
+            reservas.forEach(reserva => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.textContent = `Área: ${reserva.area_nome}, Morador: ${reserva.morador_nome} (Moradia: ${reserva.morador_moradia}), Data: ${reserva.data_reserva}, Início: ${reserva.hora_inicio}, Fim: ${reserva.hora_fim}`;
+                reservasList.appendChild(li);
+            });
+        }
+
+        loadAreas();
+        loadMoradores();
+        loadReservas();
+    </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Lista de Receitas</title>
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 class="text-center">Lista de Receitas</h1>
+    <div class="container mt-4">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                    <th>Data</th>
+                    <th>Categoria</th>
+                    <th>Ações</th> <!-- Coluna de ações -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for receita in receitas %}
+                <tr>
+                    <td>{{ receita.descricao }}</td>
+                    <td>R$ {{ '{:.2f}'.format(receita.valor) }}</td>
+                    <td>{{ receita.data.strftime('%d/%m/%Y') }}</td>
+                    <td>
+                        {% for categoria in categorias %}
+                        {% if categoria.id == receita.categoria_id %}
+                        {{ categoria.nome }}
+                        {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('editar_receita', id=receita.id) }}"
+                            class="btn btn-warning btn-sm">Editar</a>
+                        <a href="{{ url_for('confirmar_exclusao_receita', id=receita.id) }}"
+                            class="btn btn-danger  btn-sm">Excluir</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">Nenhuma receita encontrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- Botão Voltar à esquerda -->
+        <div class="d-flex justify-content-start">
+            <a href="http://127.0.0.1:5000/financeiro" class="btn btn-primary mb-3">Voltar</a>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

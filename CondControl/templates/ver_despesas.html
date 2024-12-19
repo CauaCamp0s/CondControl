@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Lista de Despesas</title>
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="text-center">Lista de Despesas</h1>
+    <div class="container mt-4">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                    <th>Data</th>
+                    <th>Categoria</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for despesa in despesas %}
+                <tr>
+                    <td>{{ despesa.descricao }}</td>
+                    <td>{{ despesa.valor }}</td>
+                    <td>{{ despesa.data }}</td>
+                    <td>{{ despesa.categoria }}</td>
+                    <td>
+                        <a href="{{ url_for('editar_despesa', id=despesa.id) }}" class="btn btn-warning">Editar</a>
+                        <form action="{{ url_for('excluir_despesa', id=despesa.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-danger">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            
+        </table>
+        <a href="http://127.0.0.1:5000/financeiro" class="btn btn-primary mb-3">Voltar</a>
+
+    </div>
+</body>
+</html>
